@@ -1,8 +1,9 @@
 from crypt import methods
 from dataclasses import fields
 from email import message
+import string
 from flask import Flask, jsonify, request
-from sqlalchemy import Column, ForeignKey, Integer, String, Float
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
@@ -31,34 +32,39 @@ mail = Mail(app)
 # db models - could be in a different file
 
 
-class_participants = db.Table('class_participants',
-    db.Column('class_id', Integer, ForeignKey('class.id')),
-    db.Column('user_id', Integer, ForeignKey('user.id')))
+# class_participants = db.Table('class_participants',
+#     db.Column('class_id', Integer, ForeignKey('class.id')),
+#     db.Column('user_id', Integer, ForeignKey('user.id')))
 
 
 
 class User(db.Model):
     __tablename__ = "user"
     id = Column(Integer, primary_key = True)    
-    first_name = Column(String)
-    last_name = Column(String)
-    email= Column(String)
+    first_name = Column(String, nullable = False)
+    last_name = Column(String, nullable = False)
+    email= Column(String, unique = True, nullable=False)
     password = Column(String)
-    class_id = Column(Integer, ForeignKey("class.id"))
+    class_id = db.Column(Integer, ForeignKey("class.id"))
+  
+
 
 
 class YogaClass(db.Model):
     __tablename__ = "class"
     id = Column(Integer, primary_key = True)   
-    user_id = Column(Integer, ForeignKey("user.id"))
     class_type = Column(String)
     teacher_name= Column(String)
-    description = Column(String)
-    participants = db.relationship('User',
-                                secondary="class_participants",
-                                backref="class",
-                                lazy='dynamic')
-
+    description = Column(Text)
+    users = db.relationship("User", backref="class_booked", lazy="select")
+    
+    def get_users_list(self):
+        users_list = ""
+        if self.users:
+            for user in self.users:
+                users_list += user.email 
+                users_list+=","
+        return users_list
 
 
 
@@ -68,11 +74,12 @@ class UserSchema(ma.Schema):
     "first_name",
         "last_name",
         "email",
-        "password",)
+        "password",
+        "classes")
 
 class YogaClassSchema(ma.Schema):
     class Meta:
-        fields = ("id","class_type","teacher_name", "description")
+        fields = ("id","class_type","teacher_name", "description",)
 
 
 user_schema = UserSchema()
@@ -115,21 +122,22 @@ def db_seed():
     print("db seeded")
 
 
-#planets project routes    
+#yoga project routes    
 
-@app.route("/yoga_classes", methods = ["GET"])
+@app.route("/api/yoga_classes", methods = ["GET"])
 def yoga_classes():
     yoga_classes_list = YogaClass.query.all()
     result = yoga_classes_schema.dump(yoga_classes_list)
     return jsonify(result)
 
 
-@app.route("/register", methods =["POST"])
+@app.route("/api/register", methods =["POST"])
 def register():
+    print(request)
     email = request.json["email"] 
     test = User.query.filter_by(email=email).first()
     if test:
-        return jsonify(message = "That email already exists"), 409
+        return jsonify(message = "This email already exists"), 409
     else:
         first_name = request.json["first_name"]
         last_name = request.json["last_name"]
@@ -140,9 +148,7 @@ def register():
         return jsonify(message=f"{user.first_name} added to the db"), 200
 
 
-
-
-@app.route("/login", methods = ["POST"])
+@app.route("/api/login", methods = ["POST"])
 def login():
     if request.is_json:
         email = request.json["email"]
@@ -153,12 +159,29 @@ def login():
     test = User.query.filter_by(email=email, password = password).first()
     if test:
         access_token = create_access_token(identity=email)
-        return jsonify(message="Loggin successful", access_token=access_token)
+        return jsonify(message="Login successful", access_token=access_token)
     else:
         return jsonify(message="Wrong email or password"), 401
 
+@app.route("/api/book_class/<string:class_type>", methods =["PUT"])
+@jwt_required()
+def book_class(class_type: str):
+    email = request.form["email"]
+    yogaClass = YogaClass.query.filter_by(class_type = class_type).first()
+    print(email)
+    participant = User.query.filter_by(email = email).first()
+    if not yogaClass or not participant:
+        return jsonify(message = "This class doesnt exist or the user is not recognised"), 409
+    else:
+        yogaClass.users.append(participant)
+        db.session.commit()
 
-@app.route("/retrieve_pass/<string:email>", methods=["POST"])
+        yogaClass.user.append(participant)
+        db.session.commit()
+        return jsonify(message=f"{participant.first_name} registered to class"), 200
+
+
+@app.route("/api/retrieve_pass/<string:email>", methods=["POST"])
 def retrieve_pass(email:str):
     user = User.query.filter_by(email = email).first()
     if user:
@@ -172,17 +195,18 @@ def retrieve_pass(email:str):
 
 
     
-@app.route("/yoga_class_details/<int:id>", methods =["GET"])
-def yoga_class_details(id:int):
-    yoga_class = YogaClass.query.filter_by(id = id).first()
+@app.route("/api/yoga_class_details/<string:class_type>", methods =["GET"])
+def yoga_class_details(class_type:string):
+    yoga_class = YogaClass.query.filter_by(class_type = class_type).first()
     if yoga_class:
         result = yoga_class_schema.dump(yoga_class)
+        result["participants"] = yoga_class.get_users_list()
         return jsonify(message = result)
     else:
         return jsonify(message = "Class not found")
 
 
-@app.route("/add_yoga_class", methods =["POST"])
+@app.route("/api/add_yoga_class", methods =["POST"])
 @jwt_required()
 def add_yoga_class():
     class_type = request.json["class_type"] if request.is_json else request.form["class_type"]
@@ -199,7 +223,7 @@ def add_yoga_class():
         return jsonify(message = f"{class_type} already exists"), 409
 
 
-@app.route("/update_class/<int:id>", methods =["PUT"])
+@app.route("/api/update_class/<int:id>", methods =["PUT"])
 @jwt_required()
 def update_class(id:int):
     yoga_class = YogaClass.query.filter_by(id = id).first()
@@ -215,7 +239,7 @@ def update_class(id:int):
         return jsonify(message = f"{class_type} already exists"), 409
 
 
-@app.route("/delete_class/<int:id>", methods = ["DELETE"])
+@app.route("/api/delete_class/<int:id>", methods = ["DELETE"])
 @jwt_required()
 def delete_class(id:int):
     yoga_class = YogaClass.query.filter_by(id = id).first()
