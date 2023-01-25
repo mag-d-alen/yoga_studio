@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AuthState,
+  BookinClassData,
   GenericResponse,
   LoginData,
   UserType,
@@ -13,7 +14,6 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     prepareHeaders: (headers, { getState }) => {
-      // By default, if we have a token in the store, let's use that for authenticated requests
       const token = (getState() as RootState).auth.access_token;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
@@ -21,8 +21,8 @@ export const api = createApi({
       return headers;
     },
   }),
+  tagTypes: ["YogaClasses", "SingleClass", "Users"],
 
-  tagTypes: ["YogaClasses", "Users"],
   endpoints: (builder) => ({
     getYogaClasses: builder.query({
       query: () => "/yoga_classes",
@@ -30,6 +30,7 @@ export const api = createApi({
     }),
     getClassDetails: builder.query({
       query: (yogaType: string) => `/yoga_class_details/${yogaType}`,
+      providesTags: ["SingleClass"],
     }),
 
     registerUser: builder.mutation<
@@ -44,12 +45,21 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
 
-    loginUser: builder.mutation<any, any>({
+    loginUser: builder.mutation<any, LoginData>({
       query: (body: LoginData) => ({
         url: `/login`,
         method: "POST",
         body,
       }),
+    }),
+
+    bookClass: builder.mutation<any, BookinClassData>({
+      query: (body: BookinClassData) => ({
+        url: `/book_class/${body.classType}`,
+        method: "PUT",
+        body: { email: body.email },
+      }),
+      invalidatesTags: ["SingleClass"],
     }),
   }),
 });
@@ -59,4 +69,5 @@ export const {
   useGetClassDetailsQuery,
   useRegisterUserMutation,
   useLoginUserMutation,
+  useBookClassMutation,
 } = api;

@@ -1,10 +1,8 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { useRegisterUserMutation } from "../../redux/api";
-import { is } from "immer/dist/internal";
-import { GenericResponse } from "../../types";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../button/Button";
+import { Input } from "../inputField/Input";
 
 export const Register = () => {
   const [first_name, setFirst_name] = useState<string>("");
@@ -57,8 +55,7 @@ export const Register = () => {
       {response.message ? (
         <div>
           {response.message}
-
-          <button onClick={handleOnClick}>Go back</button>
+          <Button label={"Go back"} clickHandler={handleOnClick} />
         </div>
       ) : (
         <form
@@ -68,23 +65,26 @@ export const Register = () => {
             width: "20rem",
             margin: "auto",
           }}
-          onSubmit={e=>register}>
-          <input
-            onChange={(e) => setFirst_name(e.target.value)}
-            value={first_name}></input>
-          <input
-            onChange={(e) => setLast_name(e.target.value)}
-            value={last_name}></input>
+          onSubmit={(e) => register}>
+          <Input
+            placeholder={"first name"}
+            changeHandler={(e) => setFirst_name(e.target.value)}
+            value={first_name}></Input>
+          <Input
+            placeholder={"last name"}
+            changeHandler={(e) => setLast_name(e.target.value)}
+            value={last_name}></Input>
 
-          <input
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}></input>
+          <Input
+            placeholder={"email"}
+            changeHandler={(e) => setEmail(e.target.value)}
+            value={email}></Input>
 
-          <input
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}></input>
-
-          <button type="submit">submit</button>
+          <Input
+            placeholder={"password"}
+            changeHandler={(e) => setPassword(e.target.value)}
+            value={password}></Input>
+          <Button type="submit" label={"submit"} clickHandler={() => {}} />
         </form>
       )}
     </>

@@ -14,15 +14,20 @@ export type KnownError = {
 
 export type AuthState = {
   access_token: string | null;
+  user: UserType | null;
 };
 
 export interface LoginData {
   email: string;
   password: string;
 }
-
+export interface BookinClassData {
+  classType: string;
+  email: string;
+}
 export type UserType = {
   email: string;
+  id?: number;
   // role: string;
   first_name: string;
   last_name: string;

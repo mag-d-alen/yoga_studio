@@ -159,24 +159,23 @@ def login():
     test = User.query.filter_by(email=email, password = password).first()
     if test:
         access_token = create_access_token(identity=email)
-        return jsonify(message="Login successful", access_token=access_token)
+        user = user_schema.dump(test)
+        return jsonify(message="Login successful", access_token=access_token, user=user)
     else:
         return jsonify(message="Wrong email or password"), 401
 
 @app.route("/api/book_class/<string:class_type>", methods =["PUT"])
 @jwt_required()
 def book_class(class_type: str):
-    email = request.form["email"]
+
+    email = request.json["email"] if request.is_json else request.form["email"]
     yogaClass = YogaClass.query.filter_by(class_type = class_type).first()
-    print(email)
+   
     participant = User.query.filter_by(email = email).first()
     if not yogaClass or not participant:
         return jsonify(message = "This class doesnt exist or the user is not recognised"), 409
     else:
         yogaClass.users.append(participant)
-        db.session.commit()
-
-        yogaClass.user.append(participant)
         db.session.commit()
         return jsonify(message=f"{participant.first_name} registered to class"), 200
 

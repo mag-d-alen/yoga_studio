@@ -2,12 +2,14 @@
 
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { AuthState, LoginData } from "../../types";
+import { AuthState, LoginData, UserType } from "../../types";
 import { useLoginUserMutation } from "../../redux/api";
 import { setCredentials } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Button } from "../button/Button";
+import { Input } from "../inputField/Input";
 
 const LoginScreen = () => {
   const [password, setPassword] = useState<string>("");
@@ -21,12 +23,18 @@ const LoginScreen = () => {
   const onLogin = async () => {
     if ([email, password].every(Boolean) && !isLoading) {
       try {
-        const data: { access_token: string; message: string } = await user({
-          email,
-          password,
-        }).unwrap();
-        toast(data.message, { position: "top-center" });
-        dispatch(setCredentials({ access_token: data.access_token }));
+        const data: { access_token: string; message: string; user: UserType } =
+          await user({
+            email,
+            password,
+          }).unwrap();
+        toast(data.message, {
+          position: "top-center",
+          onClose: () => navigate("/"),
+        });
+        dispatch(
+          setCredentials({ access_token: data.access_token, user: data.user })
+        );
       } catch (error: any) {
         toast(error.data.message, {
           position: "top-center",
@@ -44,14 +52,13 @@ const LoginScreen = () => {
         margin: "auto",
       }}>
       <ToastContainer />
-      <input onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-      <input
+      <Input changeHandler={(e) => setEmail(e.target.value)} placeholder="Email" value={email} />
+      <Input
         type="password"
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
+        changeHandler={(e) => setPassword(e.target.value)}
+        placeholder="Password" value={password}      />
 
-      <button onClick={() => onLogin()}>Submit</button>
+      <Button label="submit" clickHandler={onLogin} />
     </div>
   );
 };

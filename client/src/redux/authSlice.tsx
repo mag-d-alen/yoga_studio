@@ -5,6 +5,7 @@ import { UserType } from "../types";
 
 type AuthState = {
   access_token: string | null;
+  user: UserType | null;
 };
 
 const authSlice = createSlice({
@@ -13,9 +14,12 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-          { payload: token }: PayloadAction<{ access_token:string}>
+      {
+        payload: token,
+      }: PayloadAction<{ access_token: string; user: UserType }>
     ) => {
-      state.access_token =  token.access_token
+      state.access_token = token.access_token;
+      state.user = token.user;
     },
   },
 });

@@ -1,18 +1,42 @@
 import React from "react";
 import { YogaClassType } from "../../types";
 import { YogaClassDetailsContainer } from "./YogaClass.styled";
-import { useGetClassDetailsQuery } from "../../redux/api";
-
+import { useBookClassMutation, useGetClassDetailsQuery } from "../../redux/api";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import { Button } from "../button/Button";
+import { CloseButton } from "../button/CloseButton";
 export const YogaClassDetails: React.FC<{
   yogaClass: YogaClassType;
   close: () => void;
 }> = ({ yogaClass, close }) => {
+  const navigate = useNavigate();
+  const currentUser = useSelector((s: any) => s.auth.user);
   const { data, isLoading } = useGetClassDetailsQuery(yogaClass.class_type);
+  const [bookclassrequest, { error, isLoading: isBookLoading }] =
+    useBookClassMutation();
 
+  const bookClass = async () => {
+    try {
+      let yoga = yogaClass.class_type;
+      let email = currentUser.email;
+      const result = await bookclassrequest({
+        classType: yoga,
+        email,
+      }).unwrap();
+      toast(result.message, {
+        position: "top-center",
+        onClose: () => navigate("/"),
+      });
+    } catch (error: any) {
+      toast(error.data.message, { position: "top-center" });
+    }
+  };
   return (
     <YogaClassDetailsContainer>
-      <button onClick={close}>close</button>
-
+      <CloseButton clickHandler={close} />
+      <ToastContainer />
       {isLoading ? <div>Loading</div> : null}
       {data ? (
         <>
@@ -22,7 +46,17 @@ export const YogaClassDetails: React.FC<{
           {data.message.participants ? (
             <p>Participants: {data.message.participants}</p>
           ) : null}
-          <button>Book the {data.message.class_type} class</button>
+          {currentUser ? (
+            <Button
+              label={`Book the ${data.message.class_type} class`}
+              clickHandler={bookClass}
+            />
+          ) : (
+            <Button
+              label={"Log in to book the class"}
+              clickHandler={() => navigate("/login")}
+            />
+          )}
         </>
       ) : null}
     </YogaClassDetailsContainer>

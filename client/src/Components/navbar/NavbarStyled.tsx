@@ -1,8 +1,13 @@
 import styled from "styled-components";
 
 export const NavbarContainer = styled.div`
-    display:flex;
-    padding: 1rem;
-    justify-content: space-around;
-    align-items:center
-`
+  font-family: "Lato", sans-serif;
+  display: flex;
+  padding: 1rem;
+  justify-content: space-around;
+  align-items: center;
+  text-transform: upperCase;
+  a {
+    text-decoration: none;
+  }
+`;
