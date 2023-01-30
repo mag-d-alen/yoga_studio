@@ -10,6 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Button } from "../button/Button";
 import { Input } from "../inputField/Input";
+import { LoginScreenContainer, ButtonsContainer } from "./LoginScreen.styled";
 
 const LoginScreen = () => {
   const [password, setPassword] = useState<string>("");
@@ -44,22 +45,27 @@ const LoginScreen = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "20rem",
-        margin: "auto",
-      }}>
+    <LoginScreenContainer>
       <ToastContainer />
-      <Input changeHandler={(e) => setEmail(e.target.value)} placeholder="Email" value={email} />
+      <Input
+        changeHandler={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        value={email}
+      />
       <Input
         type="password"
         changeHandler={(e) => setPassword(e.target.value)}
-        placeholder="Password" value={password}      />
-
-      <Button label="submit" clickHandler={onLogin} />
-    </div>
+        placeholder="Password"
+        value={password}
+      />
+      <ButtonsContainer>
+        <Button label="submit" clickHandler={onLogin} />
+        <Button
+          label="create account"
+          clickHandler={() => navigate("/register")}
+        />
+      </ButtonsContainer>
+    </LoginScreenContainer>
   );
 };
 export default LoginScreen;

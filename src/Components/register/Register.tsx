@@ -3,6 +3,7 @@ import { useRegisterUserMutation } from "../../redux/api";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../button/Button";
 import { Input } from "../inputField/Input";
+import { LoginScreenContainer } from "../login/LoginScreen.styled";
 
 export const Register = () => {
   const [first_name, setFirst_name] = useState<string>("");
@@ -46,8 +47,7 @@ export const Register = () => {
     response.status === 200 ? navigate("/") : setResponse({});
   };
 
-  const register = (e: SubmitEvent) => {
-    e.preventDefault();
+  const register = () => {
     onRegisterUser();
   };
   return (
@@ -58,14 +58,7 @@ export const Register = () => {
           <Button label={"Go back"} clickHandler={handleOnClick} />
         </div>
       ) : (
-        <form
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            width: "20rem",
-            margin: "auto",
-          }}
-          onSubmit={(e) => register}>
+        <LoginScreenContainer>
           <Input
             placeholder={"first name"}
             changeHandler={(e) => setFirst_name(e.target.value)}
@@ -84,8 +77,12 @@ export const Register = () => {
             placeholder={"password"}
             changeHandler={(e) => setPassword(e.target.value)}
             value={password}></Input>
-          <Button type="submit" label={"submit"} clickHandler={() => {}} />
-        </form>
+          <Button
+            type="submit"
+            label={"submit"}
+            clickHandler={() => register}
+          />
+        </LoginScreenContainer>
       )}
     </>
   );

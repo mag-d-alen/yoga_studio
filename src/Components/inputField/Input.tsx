@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from "react";
-import { FormInput } from "./InputField.styled";
+import { InputField } from "./InputField.styled";
 
 export const Input: React.FC<{
   value: string;
@@ -8,7 +8,7 @@ export const Input: React.FC<{
   type?: string;
 }> = ({ value, changeHandler, type, placeholder }) => {
   return (
-    <FormInput
+    <InputField
       type={type ? type : "text"}
       onChange={changeHandler}
       value={value}

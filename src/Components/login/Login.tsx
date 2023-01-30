@@ -8,7 +8,6 @@ export const Login = () => {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <LoginScreen />
-      <Button label="create account" clickHandler={()=>navigate("/register")} />
     </div>
   );
 };

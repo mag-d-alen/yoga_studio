@@ -10,10 +10,11 @@ export const ButtonWrapper = styled.button`
   text-transform: uppercase;
   max-width: fit-content;
   margin: 0.5rem auto 0.5rem auto;
+  min-width: 10rem;
 
   :hover {
     box-shadow: 6px 6px 10px 6px rgba(0, 0, 0, 0.3);
-    background-color: #0c620c98;
+    background-color: #ffffff43;
     color: white;
   }
 `;
@@ -24,7 +25,6 @@ export const CloseButtonWrapper = styled.button`
   align-items: center;
   border-radius: 50%;
   border: 0.2px solid darkgreen;
-  /* box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3); */
   text-transform: uppercase;
   width: 2.1rem;
   height: 2rem;
@@ -32,7 +32,7 @@ export const CloseButtonWrapper = styled.button`
   margin: 0.5rem 0 0.5rem auto;
   :hover {
     box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.3);
-    background-color: #0c620c98;
+    background-color: #ffffff43;
     color: white;
   }
 `;

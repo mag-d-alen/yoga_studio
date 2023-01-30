@@ -8,7 +8,6 @@ import { AboutYoga } from "./Components/aboutYoga/AboutYoga";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { Login } from "./Components/login/Login";
-
 const App = () => {
   return (
     <Provider store={store}>

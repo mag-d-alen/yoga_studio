@@ -7,7 +7,16 @@ export const NavbarContainer = styled.div`
   justify-content: space-around;
   align-items: center;
   text-transform: upperCase;
+  height: 2rem;
   a {
+    text-align: center;
+    padding:0.5rem;
+    border-radius:0.3rem;
+    width: 10rem;
     text-decoration: none;
+    color: white;
+    :hover {
+      background-color: #ffffff43;
+    }
   }
 `;
